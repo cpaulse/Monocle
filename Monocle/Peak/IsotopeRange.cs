@@ -26,24 +26,34 @@ namespace Monocle.Peak {
         /// </summary>
         public int CompareSize;
 
-        public IsotopeRange(double mass) {
+        public IsotopeRange(double mass, bool foo = false) {
+            bool containsSe = true;
             if (mass > 2900)
             {
-                Isotopes = 14;
-                Left = -7;
-                CompareSize = 7;
+                Isotopes = containsSe ? 23 : 14;
+                Left = containsSe ? -12: -7;
+                CompareSize = containsSe ? 14: 7;
+                Left = -12;
+                Isotopes = 23;
+                CompareSize = 11;
             }
             else if (mass > 1200)
             {
-                Isotopes = 10;
-                Left = -5;
-                CompareSize = 5;
+                Isotopes = containsSe ? 17 : 10;
+                Left = containsSe ? -8 : -5;
+                CompareSize = containsSe ? 9 : 5;
+                Isotopes = 17;
+                Left = -8;
+                CompareSize = 9;
             }
             else
             {
-                Isotopes = 7;
-                Left = -3;
-                CompareSize = 4;
+                Isotopes = containsSe ? 12: 7;
+                Left = containsSe ? -5 : -3;
+                CompareSize = containsSe ? 7 : 4;
+                Isotopes = 12;
+                Left = -5;
+                CompareSize = 7;
             }
             MonoisotopicIndex = -1 * Left;
         }

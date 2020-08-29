@@ -22,8 +22,11 @@ namespace Monocle.Tests.Tests
             Scan parentScan = new Scan();
             GetBlock(reader, 1, ref ms2Scan, ref parentScan, ref scans);
             MonocleOptions options = new MonocleOptions();
+            options.SearchForSelenium = true;
             Monocle.Run(scans, parentScan, ms2Scan.Precursors[0], options);
             Assert.Equal(687.39195, ms2Scan.Precursors[0].Mz, 3);
+            Assert.Equal(2, ms2Scan.Precursors[0].Charge);
+            Assert.False(ms2Scan.Precursors[0].isSe);
         }
         
         // d00810.raw scan 4734
@@ -38,8 +41,12 @@ namespace Monocle.Tests.Tests
             Scan parentScan = new Scan();
             GetBlock(reader, 2, ref ms2Scan, ref parentScan, ref scans);
             MonocleOptions options = new MonocleOptions();
+            options.SearchForSelenium = true;
+            ms2Scan.Precursors[0].Charge = 0;
             Monocle.Run(scans, parentScan, ms2Scan.Precursors[0], options);
             Assert.Equal(1009.98842, ms2Scan.Precursors[0].Mz, 2);
+            Assert.Equal(4, ms2Scan.Precursors[0].Charge);
+            Assert.False(ms2Scan.Precursors[0].isSe);
         }
 
         // d00810.raw scan 5020
@@ -54,8 +61,12 @@ namespace Monocle.Tests.Tests
             Scan parentScan = new Scan();
             GetBlock(reader, 3, ref ms2Scan, ref parentScan, ref scans);
             MonocleOptions options = new MonocleOptions();
+            options.SearchForSelenium = true;
+            ms2Scan.Precursors[0].Charge = 0;
             Monocle.Run(scans, parentScan, ms2Scan.Precursors[0], options);
+            Assert.Equal(3, ms2Scan.Precursors[0].Charge);
             Assert.Equal(869.449817, ms2Scan.Precursors[0].Mz, 3);
+            Assert.False(ms2Scan.Precursors[0].isSe);
         }
 
         [Fact]
@@ -84,11 +95,22 @@ namespace Monocle.Tests.Tests
             }
             MonocleOptions options = new MonocleOptions();
             options.AveragingVector = AveragingVector.Both;
+            options.SearchForSelenium = true;
+            scans[10].Precursors[0].Charge = 0;
+            scans[31].Precursors[0].Charge = 0;
+            scans[52].Precursors[0].Charge = 0;
+
             Monocle.Run(ref scans, options);
 
             Assert.Equal(687.39195, scans[10].Precursors[0].Mz, 3);
+            Assert.Equal(2, scans[10].Precursors[0].Charge);
+            Assert.False(scans[10].Precursors[0].isSe);
             Assert.Equal(1009.98842, scans[31].Precursors[0].Mz, 2);
+            Assert.Equal(4, scans[31].Precursors[0].Charge);
+            Assert.False(scans[31].Precursors[0].isSe);
             Assert.Equal(869.449817, scans[52].Precursors[0].Mz, 3);
+            Assert.Equal(3, scans[52].Precursors[0].Charge);
+            Assert.False(scans[52].Precursors[0].isSe);
         }
 
         // The test mzxml contains 4 ms2 scans with +/- 10 ms1 scans 

@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 
 namespace Monocle.Math {
@@ -14,6 +15,15 @@ namespace Monocle.Math {
             return result;
         }
 
+        public static double L2(List<double> a, List<double> b)
+        {
+            double result = 0;
+            for (int i = 0; i < a.Count && i < b.Count; i++)
+            {
+                result += (a[i] - b[i])* (a[i] - b[i]);
+            }
+            return result;
+        }
         /// <summary>
         /// Calculate average value
         /// </summary>
@@ -62,7 +72,7 @@ namespace Monocle.Math {
         /// </summary>
         ///
         /// <param name="x">The input list.</param>
-        public static void Scale(List<double> x)
+        public static void Scale(List<double> x, bool takeLog = false)
         {
             double max = 0;
             for (int j = 0; j < x.Count; j++)
@@ -79,6 +89,10 @@ namespace Monocle.Math {
                     x[j] = x[j] / max;
                 }
             }
+            if (takeLog)
+                for (int j = 0; j < x.Count; j++)
+                    if (x[j] > 0)
+                        x[j] = System.Math.Log(x[j]);
         }
     }
 }

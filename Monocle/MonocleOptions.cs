@@ -121,5 +121,9 @@ namespace Monocle
             get { return GetType().GetProperty(propertyName).GetValue(this); }
             set { GetType().GetProperty(propertyName).SetValue(this, value); }
         }
+        /// <summary>
+        /// include search for Selenium-containing peptides.
+        /// </summary>
+        public bool SearchForSelenium { get; set; } = false;
     }
 }

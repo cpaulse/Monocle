@@ -81,5 +81,7 @@ namespace Monocle.Data {
         /// This should be a value from zero to one.
         /// </summary>
         public double IsolationSpecificity { get; set; }
+
+        public bool isSe { get; set; }
     }
 }

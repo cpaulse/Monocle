@@ -150,6 +150,7 @@ namespace Monocle
         /// <param name="precursor"></param>
         public static void Run(List<Scan> Ms1ScansCentroids, Scan ParentScan, Precursor precursor, MonocleOptions Options)
         {
+            int thecount = 0;
             double precursorMz = precursor.IsolationMz;
             if (precursorMz < 1)
             {
@@ -177,7 +178,9 @@ namespace Monocle
             // For charge detection
             int bestCharge = 0;
             double bestScore = -1;
+            //double bestScore = 1000000;
             int bestIndex = 0;
+            bool containsSe = false;
             List<double> bestPeaks = new List<double>();
             List<double> bestPeakIntensities = new List<double>();
 
@@ -188,45 +191,80 @@ namespace Monocle
                 chargeRange.Low = Options.Charge_Range.Low;
                 chargeRange.High = Options.Charge_Range.High;
             }
-            
+            List<double> scores = new List<double>();
             for (int charge = chargeRange.Low; charge <= chargeRange.High; charge++)
             {
                 // Restrict number of isotopes to consider based on precursor mass.
                 double mass = precursor.Mz * charge;
-                var isotopeRange = new IsotopeRange(mass);
 
-                // Generate expected relative intensities.
-                List<double> expected = PeptideEnvelopeCalculator.GetTheoreticalEnvelope(precursorMz, charge, isotopeRange.CompareSize);
-                Vector.Scale(expected);
-
-                PeptideEnvelope envelope = PeptideEnvelopeExtractor.Extract(Ms1ScansCentroids, precursorMz, charge, isotopeRange.Left, isotopeRange.Isotopes);
-
-                // Get best match using dot product.
-                // Limit the number of isotopeRange peaks to test
-                for (int i = 0; i < (isotopeRange.Isotopes - (isotopeRange.CompareSize - 1)); ++i)
+                List<bool> envelopeOptions = new List<bool>();
+                envelopeOptions.Add(false);
+                if (Options.SearchForSelenium)
                 {
-                    List<double> observed = envelope.averageIntensity.GetRange(i, expected.Count);
-                    Vector.Scale(observed);
-                    PeptideEnvelopeExtractor.ScaleByPeakCount(observed, envelope, i);
-                    double score = Vector.Dot(observed, expected);
-
+                    envelopeOptions.Add(true);
+                }
+                foreach (var includeSelenium in envelopeOptions)
+                {
+                    var isotopeRange = new IsotopeRange(mass, includeSelenium);
+                    // Generate expected relative intensities.
+                    var compareSize = isotopeRange.CompareSize;
                     // add 5% to give bias toward left peaks.
-                    if (score > bestScore * 1.05)
+                    double biasFactor = 1.05;
+                    if (includeSelenium)
                     {
-                        bestScore = score;
-                        if (score > 0.1)
-                        {
-                            // A peak to the left is included, so add
-                            // offset to get monoisotopic index.
-                            bestIndex = i + 1;
-                            bestCharge = charge;
-                            bestPeaks = envelope.mzs[bestIndex];
-                            bestPeakIntensities = envelope.intensities[bestIndex];
+                       // compareSize += 2;
+                        //biasFactor = 1.0;
+                    }
+                    List<double> expected = PeptideEnvelopeCalculator.GetTheoreticalEnvelope(precursorMz, charge, compareSize, includeSelenium);
+                    Vector.Scale(expected);
+
+                   // Debug.Print("Isotope list");
+                    for (int ii=0; ii< expected.Count; ii++)
+                    {
+                     //   Debug.Print("{0}", expected[ii]);
+                    }
+
+                    PeptideEnvelope envelope = PeptideEnvelopeExtractor.Extract(Ms1ScansCentroids, precursorMz, charge, isotopeRange.Left, isotopeRange.Isotopes);
+                    thecount++;
+                    // Get best match using dot product.
+                    // Limit the number of isotopeRange peaks to test
+                    for (int i = 0; i < (isotopeRange.Isotopes - (isotopeRange.CompareSize - 1)); ++i)
+                    {
+                        List<double> observed = envelope.averageIntensity.GetRange(i, compareSize);
+                        Vector.Scale(observed);
+                        PeptideEnvelopeExtractor.ScaleByPeakCount(observed, envelope, i);
+                        double dot = Vector.Dot(observed, expected);
+                        double score = Vector.L2(observed, expected);
+                        score = dot;
+                        scores.Add(score);
+                       // score = dot;
+                        if (i == 3)
+                            thecount++;
+                        Debug.Print("{0},{1},{2},{3},{4},{5}",i,charge,includeSelenium,score,dot, compareSize);
+
+                       if (score > bestScore * biasFactor)
+                       //if (score < bestScore)
+                            {
+                                bestScore = score;
+                            if (score > 0.1)
+                            {
+                                // A peak to the left is included, so add
+                                // offset to get monoisotopic index.
+                                if (includeSelenium)
+                                    bestIndex = i + 5;
+                                else
+                                    bestIndex = i + 1;
+                                bestCharge = charge;
+                                containsSe = includeSelenium;
+                                bestPeaks = envelope.mzs[bestIndex];
+                                bestPeakIntensities = envelope.intensities[bestIndex];
+                            }
                         }
                     }
                 }
             } // end charge for loop
-
+            scores.Sort();
+            Debug.Print("Winning distance: {0}", scores[1] - scores[0]);
             if (bestCharge > 0)
             {
                 precursor.Charge = bestCharge;
@@ -241,6 +279,8 @@ namespace Monocle
             {
                 precursor.Mz = precursorMz;
             }
+            precursor.isSe = containsSe;
+
 
             precursor.IsolationSpecificity = IsolationSpecificityCalculator.calculate(
                 ParentScan.Centroids,

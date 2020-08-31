@@ -1,6 +1,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Monocle.Math {
     public static class Vector {
@@ -15,12 +17,36 @@ namespace Monocle.Math {
             return result;
         }
 
-        public static double L2(List<double> a, List<double> b)
+        public static double RMS(List<double> a, List<double> b)
         {
             double result = 0;
             for (int i = 0; i < a.Count && i < b.Count; i++)
             {
-                result += (a[i] - b[i])* (a[i] - b[i]);
+                 result += (a[i] - b[i]) * (a[i] - b[i]);
+            }
+            return System.Math.Sqrt(result)/a.Count;
+        }
+
+        public static double ChiSquared(List<double> a, List<double> b)
+        {
+            double result = 0;
+            for (int i = 0; i < a.Count && i < b.Count; i++)
+            {
+                if (b[i] == 0)
+                {
+                    if (a[i] == 0)
+                        continue;
+                    else
+                    {
+                        double minNonzero = b.OrderBy(j => j).Take(2).ToList()[1];
+                        Debug.Assert(minNonzero > 0);
+                        result += a[i] / minNonzero;
+                    }
+                }
+                else 
+                {
+                    result += (a[i] - b[i]) * (a[i] - b[i]) / b[i];
+                }
             }
             return result;
         }
@@ -81,6 +107,8 @@ namespace Monocle.Math {
                 {
                     max = x[j];
                 }
+                if (takeLog && x[j] == 0)
+                    x[j] = 1;
             }
             if (max > 0)
             {
@@ -91,8 +119,49 @@ namespace Monocle.Math {
             }
             if (takeLog)
                 for (int j = 0; j < x.Count; j++)
-                    if (x[j] > 0)
-                        x[j] = System.Math.Log(x[j]);
+                    x[j] = System.Math.Log(x[j]);
+        }
+
+        /// <summary>
+        /// Scales all values in the input so that the sum is 1
+        /// </summary>
+        ///
+        /// <param name="x">The input list.</param>
+        public static void Normalize(List<double> x, int start = 0, bool takeLog = false)
+        {
+            double sum = 0;
+            for (int j = start; j < x.Count; j++)
+            {
+                if (takeLog && x[j] == 0)
+                    x[j] = 1;
+                if (takeLog)
+                    sum += System.Math.Log(x[j]);
+                else
+                    sum += x[j];
+            }
+            if (sum == 0)
+                return;
+            for (int j = 0; j < x.Count; j++)
+            {
+                if (takeLog)
+                {
+                    if (x[j] == 0)
+                        x[j] = 1;
+                    x[j] = System.Math.Log(x[j]) / sum;
+                }
+                else
+                    x[j] /= sum;
+            }
+        }
+
+
+        public static void Log(List<double> x)
+        {
+            for (int j = 0; j < x.Count; j++)
+            {
+                if (x[j] != 0)
+                    x[j] = System.Math.Sqrt(x[j]);
+            }
         }
     }
 }

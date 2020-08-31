@@ -23,9 +23,12 @@ namespace Monocle.Peak
             int numCarbons = EstimateCarbons(precursorMz, charge, hasSelenium);
             List<double> output = new List<double>(new double[compareSize]);
             output[0] = 0.0;
-            for (int i = 1; i < compareSize; ++i)
+            int start = 1;
+            if (hasSelenium)
+                start = 0;
+            for (int i = start; i < compareSize; ++i)
             {
-                output[i] = Binomial.P(numCarbons, i - 1, 0.011);
+                output[i] = Binomial.P(numCarbons, hasSelenium ? i : i - 1, 0.011);
             }
 
             if (hasSelenium)

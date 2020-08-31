@@ -112,6 +112,16 @@ namespace Monocle
         public bool UseMostIntense { get; set; } = false;
 
         /// <summary>
+        /// include search for Selenium-containing peptides.
+        /// </summary>
+        public bool SearchForSelenium { get; set; } = false;
+
+        /// <summary>
+        /// Use minimum sum of squared resuidual for scoring precursor matches.
+        /// </summary>
+        public bool ScoreWithSSR { get; set; } = false;
+
+        /// <summary>
         /// Allow get/set of property based on property name
         /// </summary>
         /// <param name="propertyName"></param>
@@ -121,9 +131,5 @@ namespace Monocle
             get { return GetType().GetProperty(propertyName).GetValue(this); }
             set { GetType().GetProperty(propertyName).SetValue(this, value); }
         }
-        /// <summary>
-        /// include search for Selenium-containing peptides.
-        /// </summary>
-        public bool SearchForSelenium { get; set; } = false;
     }
 }

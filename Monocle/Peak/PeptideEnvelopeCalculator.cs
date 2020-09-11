@@ -65,13 +65,15 @@ namespace Monocle.Peak
             var compareSize = source.Count;
             List<double> output = new List<double>(new double[compareSize]);
             int i = 0;
-            foreach (var e in Data.Mass.SeleniumIsotopes)
+            for (int j = 0;  j < Data.Mass.SeleniumIsotopes.Length; j++)
             {
-                for (int k = i; k < compareSize; ++k)
+                var e = Data.Mass.SeleniumIsotopes[j];
+                for (int k = e.Item3; k < compareSize; ++k)
                 {
-                    output[k] += e.Item2 * source[k - i];
+                    output[k] += e.Item2 * source[k - e.Item3];
                 }
-                i++;
+               // if (j < Data.Mass.SeleniumIsotopes.Length - 1)
+               //     i+= (Data.Mass.SeleniumIsotopes[j+1].Item3 - e.Item3);
             }
             return output;
         }

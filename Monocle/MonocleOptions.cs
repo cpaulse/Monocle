@@ -49,7 +49,7 @@ namespace Monocle
         /// <summary>
         /// Toggle the use of charge detection, reports a single charge state
         /// </summary>
-        public bool Charge_Detection { get; set; } = false;
+        public bool Charge_Detection { get; set; } = true;
 
         /// <summary>
         /// Default to charges 2 - 6.
@@ -114,12 +114,17 @@ namespace Monocle
         /// <summary>
         /// include search for Selenium-containing peptides.
         /// </summary>
-        public bool SearchForSelenium { get; set; } = false;
+        public bool SearchForSelenium { get; set; } = true;
 
         /// <summary>
         /// Use minimum sum of squared resuidual for scoring precursor matches.
         /// </summary>
-        public bool ScoreWithSSR { get; set; } = false;
+        public bool ScoreWithSSR { get; set; } = true;
+
+        /// <summary>
+        /// Isotope matching tolerance in PPM.
+        /// </summary>
+        public double IsotopeMatchingTolerance { get; set; } = 5.0;
 
         /// <summary>
         /// Allow get/set of property based on property name

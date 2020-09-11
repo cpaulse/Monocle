@@ -83,5 +83,7 @@ namespace Monocle.Data {
         public double IsolationSpecificity { get; set; }
 
         public bool isSe { get; set; }
+
+        public double PValue { get; set; }
     }
 }

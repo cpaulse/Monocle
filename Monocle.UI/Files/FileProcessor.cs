@@ -176,7 +176,14 @@ namespace MonocleUI
                         writer.WriteHeader(header);
                         foreach (Scan scan in Scans) {
                             token.ThrowIfCancellationRequested();
-                            writer.WriteScan(scan);
+                            foreach (var precursor in scan.Precursors)
+                            {
+                                if (precursor.isSe && precursor.PValue < 0.005)
+                                {
+                                    writer.WriteScan(scan);
+                                    break;
+                                }
+                            }
                         }
                         writer.Close();
 

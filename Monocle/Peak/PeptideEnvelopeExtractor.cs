@@ -16,7 +16,7 @@ namespace Monocle.Peak
         /// <param name="left">A negative or zero number to indicate the number of isotopes to extract to the left of targetMz</param>
         /// <param name="numIsotopes">The total number of isotopes to extract including the number indicated by "left"</param>
         /// <returns></returns>
-        public static PeptideEnvelope Extract(List<Scan> scans, double targetMz, int charge, int left, int numIsotopes)
+        public static PeptideEnvelope Extract(List<Scan> scans, double targetMz, int charge, int left, int numIsotopes, MonocleOptions Options)
         {
             PeptideEnvelope output = new PeptideEnvelope(numIsotopes, scans.Count);
             foreach (Scan scan in scans)
@@ -24,7 +24,7 @@ namespace Monocle.Peak
                 for (int i = 0; i < numIsotopes; ++i)
                 {
                     double matchMz = targetMz + (((i + left) * Mass.AVERAGINE_DIFF) / charge);
-                    int index = PeakMatcher.Match(scan, matchMz, 3, PeakMatcher.PPM);
+                    int index = PeakMatcher.Match(scan, matchMz, Options.IsotopeMatchingTolerance, PeakMatcher.PPM);
                     if (index >= 0)
                     {
                         double mz = scan.Centroids[index].Mz;
